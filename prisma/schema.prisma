@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Order {
+  id             String   @id @default(cuid())
+  createdAt      DateTime @default(now())
+  amount         Int
+  currency       String
+  status         String   // created | paid | failed | refunded
+  phoneE164      String
+  ip             String?
+  consent        Boolean
+  audioUrl       String?
+  consentProofUrl String?
+  durationMin    Int
+  stripeSession  String
+  priceTier      String   // 5m | 10m | 20m
+  call           Call?
+}
+
+model Call {
+  id         String   @id @default(cuid())
+  orderId    String   @unique
+  createdAt  DateTime @default(now())
+  startAt    DateTime
+  endAt      DateTime
+  to         String
+  sid        String?
+  status     String   // initiated | in-progress | completed | canceled | failed
+  notes      String?
+  Order      Order    @relation(fields: [orderId], references: [id])
+}
+
+model Blocklist {
+  id        String   @id @default(cuid())
+  phoneE164 String   @unique
+  reason    String?
+  createdAt DateTime @default(now())
+}
